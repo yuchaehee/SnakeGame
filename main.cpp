@@ -98,7 +98,7 @@ int main() {
         }
 
         if ((mapInstance.mapLevel == 1 || mapInstance.mapLevel == 2) && difftime(tempTime, itemEmergeTime) / 1000.0 > 7) {
-            // itemEmergeTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 5차이나면 map 을 새로 프린트 하도록..
+            // itemEmergeTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 7차이나면 map 을 새로 프린트 하도록..
             itemEmergeTime = tempTime;
 
             // food 의 setFoodInfo() 함수를 사용해서 food 의 정보 초기화..
@@ -111,10 +111,10 @@ int main() {
             tempRandomPosY = posYDis(randomPosY);
 
             
-            if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == '1') {
+            if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == 1) {
                 // 랜덤으로 주어진 위치에 벽이 있으면 아이템 생성되면 안되니까, 벽이 아닐 때까지 while 문 돌고 setFoodInfo 함수에 넘겨줄 것임..
                 while (true) {
-                    if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == '0')
+                    if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == 0)
                         break;
 
                     tempRandomPosX = posXDis(randomPosX);

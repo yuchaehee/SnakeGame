@@ -236,8 +236,6 @@ public:
 		removeTail(temp.x, temp.y);
 		// 맨 마지막 꼬리를 잘라냄..
 		body.pop_back();
-
-		//Sleep(5);
 	}
 
 
