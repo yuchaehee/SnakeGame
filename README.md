@@ -7,18 +7,26 @@
 [스네이크 게임 임의 조건]
 1. 맵은 46x23 크기로 설정
    (맨 처음 맵, 아이템 맵, 아이템&게이트 맵으로 구분, * 맵은 3차원 배열; map[][][]의 요소는 정수를 가질 것)
+
    *(map[][][] 이 가질 수 있는 정수 요소: 0, 1, 2, 3, 4, 5)
+
    *(0: 뱀이 지나다닐 수 있음을 의미)
+
    *(1: 뱀이 지나다닐 수 없은 벽을 의미)
+
    *(2: 게이트로 변할 수 없는 벽을 의미)
+
    *(3: 싱싱한사과를 의미)
+
    *(4: 썩은사과를 의미)
+
    *(5: 게이트를 의미)
-   
+
+2. 0.15 초가 지날 때마다 뱀이 움직이도록 함.   
 3. 맨 처음 뱀의 이동 방향은 RIGHT(--> 왼쪽방향키를 눌러서 게임을 시작하면 죽음.. 수정 여부 확인 후 조건 바꿀지 말지 결정할 것..)
 4. 맨 처음 뱀의 크기는 3 (Snanke 클래스의 SnakeHead 변수 초기화 해주었고, body 라는 이름의 벡터 변수에 몸통 2개를 넣어놓음(==SnakeBody 인스턴스 2개를 넣어놓았다는 의미.))
 5. 맨 처음 시작했을 때, 방향키를 누르기 전 까지는 뱀이 움직이지 않도록 Snake 클래스의 moveX, moveY 변수 값을 0으로 설정해놓았음.
-6. ■ 는 벽, ★ 은 싱싱한사과, ◎는 썩은사과를 의미함.
+6. ■ 는 벽, ★ 은 싱싱한사과, ◎는 썩은사과, ♡는 게이트를 의미함.
 7. Food 클래스의 foodId 는 3과 4를 값으로 가질 수 있음(* 3은 싱싱한사과, 4는 썩은 사과).
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -323,14 +331,14 @@ void Map::draw() {
 }
 ```
     
-12.  main.cpp 파일에서는 시간과 관련된 변수들(startTime, tempTime, itemEmergeTime, gateEmergeTime) 을 선언하여 관리함(* 앞 전 main.cpp 에서 선언된 변수 목록 코드에 존재함을 볼 수 있).
+12.  main.cpp 파일에서는 시간과 관련된 변수들(startTime, tempTime, itemEmergeTime, gateEmergeTime) 을 선언하여 관리함(* 앞 전 main.cpp 에서 선언된 변수 목록 코드에 존재함을 볼 수 있음).
  
 13. while(true) 에서 tempTime = clock() 을 통해 계속 현재 시간을 측정함. 즉, 이 현재 시간에 미리 측정해 놓았던 startTime 을 빼서 게임이 시작된 후 흐른 시간을 계산함.
 
 14. itemEmergeTime 변수는 맵 레벨이 1이 된 후부터 값이 대입되기 시작함. 맨 처음에 itemEmergeTime 에 startTime 변수 값을 대입해 놓음. 그 후로 tempTime-itemEmergeTime 이 7s 차이가 날 때마다 itemEmergeTime 변수에 tempTime 변수의 값을 대입함. 그 후, Food 클래스의 setFoodInfo(int x, int y, int id) 함수를 호출하여 food 인스턴스의 foodId, foodPosX, foodPosY 변수 값을 업데이트 함.
 
 ```
-// main.cpp 파일의 아이템 등장시키는 부분 로직 코드드
+// main.cpp 파일의 아이템 등장시키는 부분 로직 코드
 if ((mapInstance.mapLevel == 1 || mapInstance.mapLevel == 2) && difftime(tempTime, itemEmergeTime) / 1000.0 > 7) {
     // itemEmergeTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 7차이나면 map 을 새로 프린트 하도록..
     itemEmergeTime = tempTime;
@@ -480,7 +488,7 @@ if (snake.snakeSize < 3) {
 19. 게임 진행 도중 뱀의 머리랑 뱀의 몸통이 부딪히면 게임을 종료해야함. 그러나 snake.moveX==0, snake.moveY==0 이 동시에 만족될 때(==게임 시작 직후 방향키를 누르기 전 상태) 에는 머리랑 몸이 닿아도 죽으면 안 되므로 따로 조건문을 걸어주어야 함. (즉, 0,0 을 제외한 경우에서는 뱀의 사이즈-1 만큼 반복문을 돌면서 뱀의 머리와 뱀의 몸의 위치가 같은지를 판단 할 것임. 만약 같다면 snake.isDie=true; 구문을 통해 while 문을 빠져나와 게임을 종료함.)
 
 ```
-드
+// main.cpp 파일의 뱀의 머리랑 뱀의 몸통이 부딪힌 경우 발생하는 이벤트를 처리하는 코코드
 if (snake.moveX == 0 && snake.moveY == 0) {}
 else {
     for (int i = 0; i < snake.snakeSize - 1; i++) {
