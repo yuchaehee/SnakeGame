@@ -13,6 +13,10 @@ public:
 	// 호출할 때 매개변수로 main.cpp 에서 생성해놓은 map 인스턴스의 map 배열을 던져줘야 함..
 	void setGateEmergeVec(int map[][23][46], int mapLevel);
 
+	// 이 함수는 main.cpp 에서 호출하는 함수..
+	// 게이트 한 쌍의 위치가 업데이트 되면, 게이트가 가지는 정보도 업데이트가 필요하므로..
+	void setGateInfo(int map[][23][46], int mapLevel, Gate* gate);
+
 public:
 	int gatePosX;
 	int gatePosY;

@@ -114,6 +114,8 @@ public:
 	}
 
 	void setPos(snakeDirection dir) {
+		currDir = dir;
+
 		switch (dir) {
 		case LEFT:
 			if (currDir == RIGHT) {
@@ -159,8 +161,6 @@ public:
 			}
 			break;
 		}
-
-		currDir = dir;
 	}
 
 	void move(int x, int y) {
@@ -244,6 +244,9 @@ public:
 	// gate1 은 뱀이 들어가는 게이트, gate2 는 뱀이 나가는 게이트, snakeMoveX 랑 snakeMoveY 는 현재 뱀이 이동하는 방향
 	void snakeTouchGate(Gate* gate1, Gate* gate2, int snakeMoveX, int snakeMoveY, Snake* snake) {
 		gateCount += 1;
+
+		// 게이트의 위치를 저장해놓고.. 이를 밑 조건문에서 값을 업데이트(뱀의 머리가 이동한 곳과 값이 같도록..)
+		// 그럼 이제 이 변수를 뱀의 몸통이 반복문을 돌면서 이용할 것(*뱀의 몸통 마지막 부분의 위치가 이 변수와 같아지면 반복문 종료하는 식으로 이용..)
 		int tempGate2PosX = (*gate2).gatePosX;
 		int tempGate2PosY = (*gate2).gatePosY;
 
@@ -263,11 +266,14 @@ public:
 			(*gate1).currSnakeInputDir = Gate::UP;
 
 
+		
 		// 뱀이 gate1 으로 들어갔으므로.. gate2 로 나와야함..
 		// 그래서 계획으로는 snakeHead 클래스에 teleportMove 라는 함수를 만들어서 그쪽으로 아예 위치를 옮기도록 해야할 듯!
 		// snake 클래스에도 teleportMove 함수 따로 만들어서 호출할 것..
-		// 뱀의 머리가 어디로 이동해야 하나면.. gate2 의 위치 바로 전 위치.. (만약 gate2 가 하단 가장자리에 있으면 그 위치 바로 위, 좌측 가장자리면 그 위치 바로 오른쪽)
 		if ((*gate2).isEdgeGate) {
+			// 뱀이 나가는 게이트가 맵 가장자리에 있을 때..
+			// 뱀의 머리가 어디로 이동해야 하냐면.. gate2 의 위치 바로 전 위치.. (만약 gate2 가 하단 가장자리에 있으면 그 위치 바로 위, 좌측 가장자리면 그 위치 바로 오른쪽)
+
 			if ((*gate2).gatePosX == 0) {
 				// 뱀이 나가는 게이트가 좌측 가장자리에 있으면 뱀의 이동방향은 RIGHT 로 바꿔줘야함..
 				(*snake).setPos(Snake::RIGHT);
@@ -297,6 +303,79 @@ public:
 				tempGate2PosY -= 1;
 			}
 		}
+		else {
+			// 잘 작동하는지 확인하기 위한 임시 코드..
+			/*std::cout << "맵 내부에 나가는 게이트가 있아야!!!" << "\n";
+			Sleep(10000);*/
+
+
+			// 뱀이 나가는 게이트가 맵 가장자리가 아닌 맵 내부에 있을 때..
+			// 이때 비로소 뱀이 들어가는 게이트(==gate1)의 currSnakeInputDir 변수를 사용할 것임!!
+			
+			if ((*gate2).verticalBlocked == false && (*gate2).horizontalBlocked == false) {
+				// 뱀의 진출 방향이 자유로운 경우..
+				// 현재 뱀의 진행방향으로 진출..
+				// 즉, 여기선 snake 의 setPos 함수를 호출할 필요가 없음..
+				// 그냥 snake 의 teleportMove 함수만 호출하면 됨..
+
+				// 만약 뱀의 이동 방향이 오른쪽인 상태로 들어가는 게이트에 들어갔을 때
+				// 뱀은 뱀이 나가는 게이트(==gate2) 에 자신의 이동 방향을 더한 곳으로 텔포돼야함..
+				// 즉, 이동 방향이 오른쪽이므로 뱀의 moveX=1, moveY=0 임.
+				// 즉, 이를 나가는 게이트의 위치에 더해주면, 나가는 게이트 위치 바로 오른쪽에 뱀이 텔포됨!!!
+			}
+			else if ((*gate2).verticalBlocked == true && (*gate2).horizontalBlocked == false) {
+				// 뱀이 나가는 게이트의 위아래가 막혀있으면
+				// 뱀의 진출 가능 방향은 좌우임..
+				
+				switch ((*gate1).currSnakeInputDir) {
+					// 뱀이 들어가는 게이트의 왼쪽 또는 오른쪽으로 진입할 때는 뱀의 이동 방향을 그대로 유지하면 되므로 따로 case 로 구분할 필요 없음..
+					// 변경 사항이 없으니까..
+				case Gate::UP:
+					// 만약 뱀이 들어가는 게이트의 위쪽에서 뱀이 진입하면, 나가는 게이트의 왼쪽으로 진출해야함..
+					// 이 경우에는 뱀의 이동방향을 왼쪽으로 변경해줘야함..
+					
+					(*snake).setPos(Snake::LEFT);
+
+					break;
+				case Gate::DOWN:
+					// 만약 뱀이 들어가는 게이트의 아래쪽에서 뱀이 진입하면, 나가는 게이트의 오른쪽으로 진출해야함..
+					// 이 경우에는 뱀의 이동방향을 오른쪽으로 변경해줘야함..
+
+					(*snake).setPos(Snake::RIGHT);
+
+					break;
+				}
+			}
+			else if ((*gate2).verticalBlocked == false && (*gate2).horizontalBlocked == true) {
+				// 뱀이 나가는 게이트의 양옆이 막혀있으면
+				// 뱀의 진출 가능 방향은 상하임..
+
+				switch ((*gate1).currSnakeInputDir) {
+					// 뱀이 들어가는 게이트의 위쪽 또는 오른쪽으로 진입할 때는 뱀의 이동 방향을 그대로 유지하면 되므로 따로 case 로 구분할 필요 없음..
+					// 변경 사항이 없으니까..
+				case Gate::LEFT:
+					// 만약 뱀이 들어가는 게이트의 왼쪽에서 뱀이 진입하면, 나가는 게이트의 아래쪽으로 진출해야함..
+					// 뱀의 이동방향을 아래쪽으로 변경해줘야함..
+
+					(*snake).setPos(Snake::DOWN);
+
+					break;
+				case Gate::RIGHT:
+					// 만약 뱀이 들어가는 게이트의 오른쪽에서 뱀이 진입하면, 나가는 게이트의 위쪽으로 진출해야함..
+					// 뱀의 이동방향을 위쪽으로 변경해줘야함..
+
+					(*snake).setPos(Snake::UP);
+
+					break;
+				}
+			}
+
+			// 이 로직은 공통 부분이라 밖으로 따로 뺀 것..
+			(*snake).teleportMove((*gate2).gatePosX + (*snake).moveX, (*gate2).gatePosY + (*snake).moveY);
+
+			tempGate2PosX += (*snake).moveX;
+			tempGate2PosY += (*snake).moveY;
+		}
 
 
 		while (true) {
@@ -308,7 +387,8 @@ public:
 			}
 
 			(*snake).move((*snake).moveX, (*snake).moveY);
-			Sleep(100);
+			Sleep(150);
 		}
+		Sleep(300);
 	}
 };

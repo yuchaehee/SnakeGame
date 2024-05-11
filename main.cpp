@@ -103,7 +103,26 @@ int main() {
 
             // food 의 setFoodInfo() 함수를 사용해서 food 의 정보 초기화..
             // random 으로 임의의 수 만들고 함수로 넘겨주기..
-            food.setFoodInfo(posXDis(randomPosX), posYDis(randomPosY), idDis(randomId));
+
+            int tempRandomPosX;
+            int tempRandomPosY;
+
+            tempRandomPosX = posXDis(randomPosX);
+            tempRandomPosY = posYDis(randomPosY);
+
+            
+            if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == '1') {
+                // 랜덤으로 주어진 위치에 벽이 있으면 아이템 생성되면 안되니까, 벽이 아닐 때까지 while 문 돌고 setFoodInfo 함수에 넘겨줄 것임..
+                while (true) {
+                    if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == '0')
+                        break;
+
+                    tempRandomPosX = posXDis(randomPosX);
+                    tempRandomPosY = posYDis(randomPosY);
+                }
+            }
+
+            food.setFoodInfo(tempRandomPosX, tempRandomPosY, idDis(randomId));
             mapInstance.changeMapItemState(mapInstance.mapLevel, food.foodPosX, food.foodPosY, food.prevPosX, food.prevPosY, food.foodId);
 
 
@@ -122,21 +141,7 @@ int main() {
             // gateTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 10 차이 나면 map 을 새로 프린트 하도록..
             gateEmergeTime = tempTime;
 
-            if (!gateMapStarted) {
-                // 맨 처음 gateMap 으로 진입했을 땐 변경사항 없도록 분기 나눠줌..
-                gateMapStarted = true;
-            }
-            else {
 
-                gate1.isEdgeGate = false;
-            }
-
-            if ((gate2.gatePosX == 0 || gate2.gatePosX == 45) || (gate2.gatePosY == 0 || gate2.gatePosY == 22)) {
-                gate2.isEdgeGate = true;
-            }
-            else {
-                gate2.isEdgeGate = false;
-            }
 
             // 뱀이 게이트를 통과하고 있지 않을 때, 게이트의 위치를 바꿔주는 로직을 실행할 것임..
             if (!gate1.isSnakeMoved) {
@@ -144,16 +149,52 @@ int main() {
                 int tempGate1Index = vecIndexDis(randomVecIndex);
                 int tempGate2Index = vecIndexDis(randomVecIndex);
 
+                // 만약 랜덭으로 주어진 게이트의 위치가 같으면..
+                if (tempGate1Index == tempGate2Index) {
+                    // 게이트의 위치가 서로 달라질 때까지 tempGate2Index 에 새로운 랜덤 값을 새로 할당할 것..
+                    while (true) {
+                        tempGate2Index = vecIndexDis(randomVecIndex);
+
+                        // 게이트의 위치가 서로 달라졌으므로 break 을 통해 while 구문 빠져나가기..
+                        if (tempGate2Index != tempGate1Index)
+                            break;
+                    }
+                }
+
+
                 gate1.gatePosX = gate1.gateEmergeVec[tempGate1Index].gateEmergeEnablePosX;
                 gate1.gatePosY = gate1.gateEmergeVec[tempGate1Index].gateEmergeEnablePosY;
                 gate2.gatePosX = gate2.gateEmergeVec[tempGate2Index].gateEmergeEnablePosX;
                 gate2.gatePosY = gate2.gateEmergeVec[tempGate2Index].gateEmergeEnablePosY;
+
 
                 GateEmergeEnablePos tempGate1{ gate1.gatePosX, gate1.gatePosY };
                 GateEmergeEnablePos tempGate2{ gate2.gatePosX, gate2.gatePosY };
 
                 mapInstance.changeMapGateState(mapInstance.mapLevel, tempGate1, tempGate2, gate1.prevGatePosX, gate1.prevGatePosY, gate2.prevGatePosX, gate2.prevGatePosY);
 
+
+                // 게이트가 새로 업데이트 되어야 하므로.. 게이트 정보 세팅 함수를 따로 만들어서 호출할 것..
+                // 게이트의 양옆이 막혀있는지, 위아래가 막혀있는지 판단해서 정보 업데이트 할 것임..
+                gate1.setGateInfo(mapInstance.map, mapInstance.mapLevel, &gate1);
+                gate2.setGateInfo(mapInstance.map, mapInstance.mapLevel, &gate2);
+
+                if ((gate1.gatePosX == 0 || gate1.gatePosX == 45) || (gate1.gatePosY == 0 || gate1.gatePosY == 22)) {
+                    gate1.isEdgeGate = true;
+                }
+                else {
+                    gate1.isEdgeGate = false;
+                }
+
+                if ((gate2.gatePosX == 0 || gate2.gatePosX == 45) || (gate2.gatePosY == 0 || gate2.gatePosY == 22)) {
+                    gate2.isEdgeGate = true;
+                }
+                else {
+                    gate2.isEdgeGate = false;
+                }
+
+
+                // 다음 게이트가 등장할 수 있는 위치 새로 업데이트..
                 gate1.setGateEmergeVec(mapInstance.map, mapInstance.mapLevel);
                 gate2.setGateEmergeVec(mapInstance.map, mapInstance.mapLevel);
 
@@ -162,12 +203,20 @@ int main() {
                 mapInstance.setMap();
 
 
-                // 시간이 지나면 맵에서 없애기 위해 이전 위치를 저장하기..
-                gate1.prevGatePosX = gate1.gatePosX;
-                gate1.prevGatePosY = gate1.gatePosY;
-                gate2.prevGatePosX = gate2.gatePosX;
-                gate2.prevGatePosY = gate2.gatePosY;
+                // 게이트 정보 잘 바꼈는지 확인하기 위한 임시 코드..
+                //cout << boolalpha;
+                //printf("Gate1(%d, %d) -> ", gate1.gatePosX, gate1.gatePosY);
+                //cout << "horizontalBlocked: " << gate1.horizontalBlocked << ", " << "verticalBlocked: " << gate1.verticalBlocked << "\n";
+                //printf("Gate2(%d, %d) -> ", gate2.gatePosX, gate2.gatePosY);
+                //cout << "horizontalBlocked: " << gate2.horizontalBlocked << ", " << "verticalBlocked: " << gate2.verticalBlocked << "\n";
+                //Sleep(20000);
             }
+
+            // 시간이 지나면 맵에서 없애기 위해 이전 위치를 저장하기..
+            gate1.prevGatePosX = gate1.gatePosX;
+            gate1.prevGatePosY = gate1.gatePosY;
+            gate2.prevGatePosX = gate2.gatePosX;
+            gate2.prevGatePosY = gate2.gatePosY;
         }
 
 
@@ -215,9 +264,9 @@ int main() {
             }
         }
 
+
         // 만약 뱀이 gate1 으로 들어갈 때..
         // 만약 현재 뱀의 이동 방향이 LEFT 면 snake 의 moveX=-1, moveY=0 임..
-        // 이를 gate 위치에 빼주면, 게이트 위치의 바로 오른쪽 위치를 가리킴..
         if ((snake.head.y + snake.moveY == gate1.gatePosY) && (snake.head.x + snake.moveX == gate1.gatePosX)) {
             snake.snakeTouchGate(&gate1, &gate2, snake.moveX, snake.moveY, &snake);
             Info.setGateUse(snake.gateCount - 1);
@@ -249,11 +298,12 @@ int main() {
 
 
         // 벽 닿으면 죽는거. 편의상 일단 주석처리
-        //if (mapInstance.map[mapInstance.mapLevel][snake.head.y][snake.head.x]==1) {
-        //    gotoxy(MAPWIDTH * 2 + 8, 6);
-        //    std::cout << "Game Over" << std::endl;
-        //    break; // 게임 종료
-        //}
+        if (mapInstance.map[mapInstance.mapLevel][snake.head.y][snake.head.x]==1) {
+            gotoxy(MAPWIDTH * 2 + 8, 6);
+            std::cout << "Game Over" << std::endl;
+            break; // 게임 종료
+        }
+
         if (snake.isDie) {
             gotoxy(MAPWIDTH * 2 + 8, 6);
             std::cout << "Game Over!" << std::endl;
@@ -269,7 +319,7 @@ int main() {
             snake.ReSetSnake();
             mapInstance.setMap();
         }
-        Sleep(100);
+        Sleep(150);
     }
 
 
