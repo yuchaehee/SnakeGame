@@ -99,29 +99,32 @@ public:
     // 정보 출력
     void ShowInfo() {
         gotoxy(infoStartX, 0);
-        cout << "B: " << current_length / max_length << "\n";
+        cout << "Score Board" << "\n";
 
         gotoxy(infoStartX, 1);
-        cout << "+: " << GrowthItemC << "\n";
+        cout << "B: " << current_length << " / " << max_length << "\n";
 
         gotoxy(infoStartX, 2);
-        cout << "-: " << PoisonItemC << "\n";
+        cout << "+: " << GrowthItemC << "\n";
 
         gotoxy(infoStartX, 3);
-        cout << "G: " << GateUseC << "\n";
+        cout << "-: " << PoisonItemC << "\n";
 
         gotoxy(infoStartX, 4);
+        cout << "G: " << GateUseC << "\n";
+
+        gotoxy(infoStartX, 5);
         cout << "Time: " << current_Time << "\n";
     }
 
     // 미션 정보 출력
-    void Mission() {
-        gotoxy(infoStartX, 8);
+    void Mission(int Bgoal, int Pgoal, int MinGoal, int Ggoal) {
+        gotoxy(infoStartX, 9);
         cout << "Mission" << "\n";
-        PrintMissionInfo("B", current_length / max_length, 1, 0);
-        PrintMissionInfo("+", GrowthItemC, 1, 1);
-        PrintMissionInfo("-", PoisonItemC, 1, 2);
-        PrintMissionInfo("G", GateUseC, 2, 3);
+        PrintMissionInfo("B", max_length, Bgoal, 0);
+        PrintMissionInfo("+", GrowthItemC, Pgoal, 1);
+        PrintMissionInfo("-", PoisonItemC, MinGoal, 2);
+        PrintMissionInfo("G", GateUseC, Ggoal, 3);
 
         IsCompelet = true;
         for (int i = 0; i < 4; ++i) {
@@ -136,10 +139,10 @@ private:
 
     // 미션 정보 출력 보조 함수
     int GetYPosition(const string& label) {
-        if (label == "B") return 9;
-        else if (label == "+") return 10;
-        else if (label == "-") return 11;
-        else if (label == "G") return 12;
+        if (label == "B") return 10;
+        else if (label == "+") return 11;
+        else if (label == "-") return 12;
+        else if (label == "G") return 13;
         else return -1;
     }
 
@@ -152,7 +155,7 @@ private:
             return;
         }
         else {
-            if (current != goal) {
+            if (current < goal) {
                 cout << "( )\n";
             }
             else {

@@ -3,7 +3,7 @@
 
 class Food {
 public:
-	// foodId:3 -> ½Ì½ÌÇÑ»ç°ú, foodId:4 -> ½âÀº »ç°ú
+	// foodId:3 -> ½Ì½ÌÇÑ»ç°ú, foodId:4 -> ½âÀº »ç°ú foodId: 5 -> È²±Ý»ç°ú foodId:6 --> ¹Ý´ë·Î »ç°ú
 	int foodId;
 
 	int foodPosX;

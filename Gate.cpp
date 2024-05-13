@@ -14,7 +14,7 @@ void Gate::setGateInfo(int map[][23][46], int mapLevel, Gate* gate) {
     // 일단 기본 정보는 다 초기상태로 돌려놓기(isEdgeGate 는 main.cpp 에서 따로 관리하고 있음.. 수정 여부 판단 후 여기서 관리할지 말지 결정할 것..)
     (*gate).horizontalBlocked = false;
     (*gate).verticalBlocked = false;
-    
+
     // 게이트의 위아래가 막혀있는지, 양옆이 막혀있는지 판단할 것임..
     if (map[mapLevel][(*gate).gatePosY + 1][(*gate).gatePosX] == 1 || map[mapLevel][(*gate).gatePosY - 1][(*gate).gatePosX] == 1)
         (*gate).verticalBlocked = true;

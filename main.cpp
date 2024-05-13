@@ -37,7 +37,7 @@ int main() {
     // 아이템의 아이디 랜덤 변수
     random_device randomId;
     mt19937 genItemId(randomId());
-    uniform_int_distribution<int> idDis(3, 4);
+    uniform_int_distribution<int> idDis(3, 6);
 
     // 아이템의 위치 랜덤 변수
     random_device randomPosX;
@@ -77,6 +77,12 @@ int main() {
     mt19937 genVecIndex(randomVecIndex());
     //uniform_int_distribution<int> vecIndexDis(0);
 
+    // Mission 초기값
+    int BGoal = 4;
+    int PlusGoal = 2;
+    int MinusGoal = 1;
+    int Ggoal = 1;
+    int Tick = 150;
 
     while (true) {
         tempTime = clock();
@@ -97,7 +103,7 @@ int main() {
             mapInstance.setMap();
         }
 
-        if ((mapInstance.mapLevel == 1 || mapInstance.mapLevel == 2) && difftime(tempTime, itemEmergeTime) / 1000.0 > 7) {
+        if ((mapInstance.mapLevel == 1 || mapInstance.mapLevel >= 2) && difftime(tempTime, itemEmergeTime) / 1000.0 > 7) {
             // itemEmergeTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 7차이나면 map 을 새로 프린트 하도록..
             itemEmergeTime = tempTime;
 
@@ -110,7 +116,7 @@ int main() {
             tempRandomPosX = posXDis(randomPosX);
             tempRandomPosY = posYDis(randomPosY);
 
-            
+
             if (mapInstance.map[mapInstance.mapLevel][tempRandomPosY][tempRandomPosX] == 1) {
                 // 랜덤으로 주어진 위치에 벽이 있으면 아이템 생성되면 안되니까, 벽이 아닐 때까지 while 문 돌고 setFoodInfo 함수에 넘겨줄 것임..
                 while (true) {
@@ -137,7 +143,7 @@ int main() {
         }
 
 
-        if (mapInstance.mapLevel == 2 && difftime(tempTime, gateEmergeTime) / 1000.0 > 10) {
+        if (mapInstance.mapLevel >= 2 && difftime(tempTime, gateEmergeTime) / 1000.0 > 10) {
             // gateTime 을 tempTime 으로 바꿔줌으로써.. 계속해서 10 차이 나면 map 을 새로 프린트 하도록..
             gateEmergeTime = tempTime;
 
@@ -202,14 +208,6 @@ int main() {
                 // 게이트 정보 변경 해 준 다음 맵 새로 그리기..
                 mapInstance.setMap();
 
-
-                // 게이트 정보 잘 바꼈는지 확인하기 위한 임시 코드..
-                //cout << boolalpha;
-                //printf("Gate1(%d, %d) -> ", gate1.gatePosX, gate1.gatePosY);
-                //cout << "horizontalBlocked: " << gate1.horizontalBlocked << ", " << "verticalBlocked: " << gate1.verticalBlocked << "\n";
-                //printf("Gate2(%d, %d) -> ", gate2.gatePosX, gate2.gatePosY);
-                //cout << "horizontalBlocked: " << gate2.horizontalBlocked << ", " << "verticalBlocked: " << gate2.verticalBlocked << "\n";
-                //Sleep(20000);
             }
 
             // 시간이 지나면 맵에서 없애기 위해 이전 위치를 저장하기..
@@ -239,10 +237,24 @@ int main() {
             Info.setCurrentLength(snake.snakeSize);
             Info.IncreaseGetPoisonItem();
         }
+        if (food.foodId == 5 && (snake.head.x == food.foodPosX && snake.head.y == food.foodPosY)) {
+            // 뱀의 머리랑 황금사과랑 부딪히면(== 뱀의 머리랑 황금사과의 위치가 같으면)
+            // 뱀의 사이즈가 +2.
+            snake.snakeTouchGoldApple();
+            Info.setCurrentLength(snake.snakeSize);
+            Info.setMaxLen(snake.snakeSize);
+            Info.IncreaseGetGrowthItem();
+
+        }
+        if (food.foodId == 6 && (snake.head.x == food.foodPosX && snake.head.y == food.foodPosY)) {
+            // 뱀의 머리랑 반대로사과랑 부딪히면(== 뱀의 머리랑 반대로사과의 위치가 같으면)
+            // 뱀의 머리와 꼬리 위치 바뀜. 동시에 진행 방향이 바뀐다.
+            snake.snakeTouchChangeApple(snake.moveX, snake.moveY, &snake);
+        }
 
         if (snake.snakeSize < 3) {
             snake.isDie = true;
-            gotoxy(MAPWIDTH * 2 + 8, 6);
+            gotoxy(MAPWIDTH * 2 + 8, 7);
             cout << "Game Over!";
 
             // 뱀의 크기가 3보다 작아지면 게임 끝~~!
@@ -257,7 +269,7 @@ int main() {
             for (int i = 0; i < snake.snakeSize - 1; i++) {
                 if ((snake.head.x == snake.body[i].x) && (snake.head.y == snake.body[i].y)) {
                     snake.isDie = true;
-                    gotoxy(MAPWIDTH * 2 + 8, 6);
+                    gotoxy(MAPWIDTH * 2 + 8, 7);
                     cout << "game Over!";
                     return 0;
                 }
@@ -298,28 +310,66 @@ int main() {
 
 
         // 벽 닿으면 죽는거. 편의상 일단 주석처리
-        if (mapInstance.map[mapInstance.mapLevel][snake.head.y][snake.head.x]==1) {
-            gotoxy(MAPWIDTH * 2 + 8, 6);
+        if (mapInstance.map[mapInstance.mapLevel][snake.head.y][snake.head.x] == 1) {
+            gotoxy(MAPWIDTH * 2 + 8, 7);
             std::cout << "Game Over" << std::endl;
             break; // 게임 종료
         }
 
         if (snake.isDie) {
-            gotoxy(MAPWIDTH * 2 + 8, 6);
+            gotoxy(MAPWIDTH * 2 + 8, 7);
             std::cout << "Game Over!" << std::endl;
             break; // 게임 종료
         }
+        // 유저 정보 출력
         Info.ShowInfo();
 
-        Info.Mission();
+        //5단계 추가요소. 그냥 스테이지 레벨 출력하기
+        int stageLevel = mapInstance.mapLevel;
+        if (stageLevel == 0 || stageLevel == 1 || stageLevel == 2) {
+            stageLevel = 1;
+        }
+        else {
+            stageLevel -= 1;
+        }
+
+        if (stageLevel != 4) {
+            gotoxy(MAPWIDTH * 2 + 8, 15);
+            std::cout << "Stage level: " << stageLevel << std::endl;
+        }
+        else if (stageLevel == 4) {
+            gotoxy(MAPWIDTH * 2 + 8, 15);
+            std::cout << "Stage level: Last Stage" << std::endl;
+        }
+
+
+        // 미션 정보 출력
+        Info.Mission(BGoal, PlusGoal, MinusGoal, Ggoal);
         if (Info.IsGoal()) {
-            gotoxy(MAPWIDTH * 2 + 8, 6);
+            mapInstance.mapLevel++;
+            if (mapInstance.mapLevel == 6) {
+                gotoxy(MAPWIDTH * 2 + 8, 7);
+                std::cout << "Game Clear!" << "\n";
+                Sleep(1000);
+                break;
+            }
+            gotoxy(MAPWIDTH * 2 + 8, 7);
             std::cout << "Mission Complete!" << "\n";
+            Sleep(100);
             Info.ReSetInfo();
             snake.ReSetSnake();
+
+            BGoal = rand() % 4 + 4;
+            PlusGoal = rand() % 4 + 1;
+            MinusGoal = rand() % 2 + 1;
+            Ggoal = rand() % 2 + 1;
+            //미션 달성 시 뱀 속도 증가
+            Tick -= 20;
+
             mapInstance.setMap();
         }
-        Sleep(150);
+        // 뱀 이동 속도
+        snake.tick(Tick);
     }
 
 

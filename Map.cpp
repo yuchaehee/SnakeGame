@@ -27,70 +27,37 @@ void Map::draw() {
     // 화면 지우고 1초 기다리기..
     Sleep(100);
 
-    switch (Map::mapLevel) {
-    case 0:
-        for (int i = 0; i < MAPHEIGHT; i++)
+    for (int i = 0; i < MAPHEIGHT; i++)
+    {
+        for (int j = 0; j < MAPWIDTH; j++)
         {
-            for (int j = 0; j < MAPWIDTH; j++)
-            {
-                if (map[mapLevel][i][j] == 1 || map[mapLevel][i][j] == 2)
-                    printf("■");
-                else
-                    printf(" ");
+            if (map[mapLevel][i][j] == 1 || map[mapLevel][i][j] == 2) {
+                printf("■");
             }
-            printf("\n");
-        }
-
-        break;
-    case 1:
-        for (int i = 0; i < MAPHEIGHT; i++)
-        {
-            for (int j = 0; j < MAPWIDTH; j++)
-            {
-                if (map[mapLevel][i][j] == 1 || map[mapLevel][i][j] == 2) {
-                    printf("■");
-                }
-                else if (map[mapLevel][i][j] == 3) {
-                    printf("★");
-                }
-                else if (map[mapLevel][i][j] == 4) {
-                    printf("◎");
-                }
-                else {
-                    printf(" ");
-                }
+            else if (map[mapLevel][i][j] == 3) {
+                printf("★");
             }
-            printf("\n");
-        }
-
-        break;
-    case 2:
-        for (int i = 0; i < MAPHEIGHT; i++)
-        {
-            for (int j = 0; j < MAPWIDTH; j++)
-            {
-                if (map[mapLevel][i][j] == 1 || map[mapLevel][i][j] == 2) {
-                    printf("■");
-                }
-                else if (map[mapLevel][i][j] == 3) {
-                    printf("★");
-                }
-                else if (map[mapLevel][i][j] == 4) {
-                    printf("◎");
-                }
-                else if (map[mapLevel][i][j] == 5) {
-                    printf("♡");
-                }
-                else {
-                    printf(" ");
-                }
+            else if (map[mapLevel][i][j] == 4) {
+                printf("◎");
             }
-            printf("\n");
+            else if (map[mapLevel][i][j] == 7) {
+                printf("♡");
+            }
+            else if (map[mapLevel][i][j] == 5) {
+                printf("♣");
+            }
+            else if (map[mapLevel][i][j] == 6) {
+                printf("§");
+            }
+            else {
+                printf(" ");
+            }
         }
-
-        break;
+        printf("\n");
     }
+
 }
+
 
 void Map::changeMapItemState(int mapLevel, int x, int y, int prevX, int prevY, int itemId) {
     map[mapLevel][prevY][prevX] = 0;
@@ -107,6 +74,6 @@ void Map::changeMapGateState(int mapLevel, GateEmergeEnablePos gate1, GateEmerge
     map[mapLevel][gate1PrevPosY][gate1PrevPosX] = 1;
     map[mapLevel][gate2PrevPosY][gate2PrevPosX] = 1;
 
-    map[mapLevel][gate1.gateEmergeEnablePosY][gate1.gateEmergeEnablePosX] = 5;
-    map[mapLevel][gate2.gateEmergeEnablePosY][gate2.gateEmergeEnablePosX] = 5;
+    map[mapLevel][gate1.gateEmergeEnablePosY][gate1.gateEmergeEnablePosX] = 7;
+    map[mapLevel][gate2.gateEmergeEnablePosY][gate2.gateEmergeEnablePosX] = 7;
 }

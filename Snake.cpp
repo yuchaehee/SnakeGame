@@ -43,11 +43,11 @@ public:
 class Snake {
 public:
 	enum snakeDirection {
-		LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3
+		LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3, STOP = 4
 	};
 
 	// 맨 처음은 오른쪽을 보는 상태로 시작..
-	snakeDirection currDir = RIGHT;
+	snakeDirection currDir = STOP;
 	SnakeHead head;
 	std::vector<SnakeBody> body;
 	bool isDie = false;
@@ -79,6 +79,10 @@ public:
 
 
 public:
+	void tick(int tick) {
+		Sleep(tick);
+	}
+
 	void ReSetSnake() {
 		snakeSize = 3;
 		gateCount = 0;
@@ -226,6 +230,15 @@ public:
 		// 이걸 맨 마지막 바디의 x, y 에 더해주면 맨 마지막에 꼬리가 하나 붙음..
 		body.emplace_back(body.back().x - moveX, body.back().y - moveY);
 	}
+	void snakeTouchGoldApple() {
+		snakeSize += 2;
+
+		// 꼬리쪽이 늘어나야 하므로 현재 이동 방향과 반대되는 곳으로 늘어나기
+		// 예를 들면, 현재 이동 방향이 LEFT 로 moveX = -1, moveY = 0 일 때, -moveX 해서 +1, -moveY 해서 0
+		// 이걸 맨 마지막 바디의 x, y 에 더해주면 맨 마지막에 꼬리가 하나 붙음..
+		body.emplace_back(body.back().x - moveX, body.back().y - moveY);
+		body.emplace_back(body.back().x - moveX, body.back().y - moveY);
+	}
 
 	void snakeTouchPoisonApple() {
 		snakeSize -= 1;
@@ -237,7 +250,37 @@ public:
 		// 맨 마지막 꼬리를 잘라냄..
 		body.pop_back();
 	}
+	// 먹으면 머리랑 꼬리 위치 변경, 진행 방향 반대로 변경 (꼬리 방향x, 머리 방향과 반대)
+	void snakeTouchChangeApple(int x, int y, Snake* snake) {
 
+
+		tempTailX = body.back().x;
+		tempTailY = body.back().y;
+
+		// head 먼저 움직이기..
+		int prevX = head.x;
+		int prevY = head.y;
+		head.teleportMove(tempTailX, tempTailY);
+		body.back().x = prevX;
+		body.back().y = prevY;
+
+
+		if (currDir == RIGHT) {
+			(*snake).setPos(Snake::LEFT);
+		}
+		else if (currDir == LEFT) {
+			(*snake).setPos(Snake::RIGHT);
+		}
+		else if (currDir == UP) {
+			(*snake).setPos(Snake::DOWN);
+		}
+		else if (currDir == DOWN) {
+			(*snake).setPos(Snake::UP);
+		}
+
+
+
+	}
 
 	// gate1 은 뱀이 들어가는 게이트, gate2 는 뱀이 나가는 게이트, snakeMoveX 랑 snakeMoveY 는 현재 뱀이 이동하는 방향
 	void snakeTouchGate(Gate* gate1, Gate* gate2, int snakeMoveX, int snakeMoveY, Snake* snake) {
@@ -264,7 +307,7 @@ public:
 			(*gate1).currSnakeInputDir = Gate::UP;
 
 
-		
+
 		// 뱀이 gate1 으로 들어갔으므로.. gate2 로 나와야함..
 		// 그래서 계획으로는 snakeHead 클래스에 teleportMove 라는 함수를 만들어서 그쪽으로 아예 위치를 옮기도록 해야할 듯!
 		// snake 클래스에도 teleportMove 함수 따로 만들어서 호출할 것..
@@ -309,7 +352,7 @@ public:
 
 			// 뱀이 나가는 게이트가 맵 가장자리가 아닌 맵 내부에 있을 때..
 			// 이때 비로소 뱀이 들어가는 게이트(==gate1)의 currSnakeInputDir 변수를 사용할 것임!!
-			
+
 			if ((*gate2).verticalBlocked == false && (*gate2).horizontalBlocked == false) {
 				// 뱀의 진출 방향이 자유로운 경우..
 				// 현재 뱀의 진행방향으로 진출..
@@ -324,14 +367,14 @@ public:
 			else if ((*gate2).verticalBlocked == true && (*gate2).horizontalBlocked == false) {
 				// 뱀이 나가는 게이트의 위아래가 막혀있으면
 				// 뱀의 진출 가능 방향은 좌우임..
-				
+
 				switch ((*gate1).currSnakeInputDir) {
 					// 뱀이 들어가는 게이트의 왼쪽 또는 오른쪽으로 진입할 때는 뱀의 이동 방향을 그대로 유지하면 되므로 따로 case 로 구분할 필요 없음..
 					// 변경 사항이 없으니까..
 				case Gate::UP:
 					// 만약 뱀이 들어가는 게이트의 위쪽에서 뱀이 진입하면, 나가는 게이트의 왼쪽으로 진출해야함..
 					// 이 경우에는 뱀의 이동방향을 왼쪽으로 변경해줘야함..
-					
+
 					(*snake).setPos(Snake::LEFT);
 
 					break;
